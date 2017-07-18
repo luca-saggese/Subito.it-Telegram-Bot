@@ -1,0 +1,13 @@
+{
+  "telegram_token": "",
+  "telegram_chatId": "",
+  "proxy": "",
+  "gmail_user": "",
+  "gmail_pass": "",
+  "mailto": "",
+  "searches": [
+    {
+      "url": "http://www.subito.it/annunci-lazio/vendita/auto/?cb=002222&&pe=3000&q=cooper%20s"
+    }
+  ]
+}

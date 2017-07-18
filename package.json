@@ -1,0 +1,19 @@
+{
+  "name": "subito_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jsonfile": "^3.0.1",
+    "node-telegram-bot-api": "^0.27.1",
+    "nodemailer": "^4.0.1",
+    "xmldom": "^0.1.27",
+    "xpath": "0.0.24",
+    "xpath.js": "^1.0.7"
+  }
+}
