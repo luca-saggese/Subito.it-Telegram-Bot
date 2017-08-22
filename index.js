@@ -100,6 +100,7 @@ var config={}
 			bot.on('polling_error', (error) => {
 			  console.log(error);  // => 'EFATAL'
 			  bot.stopPolling(); 
+			  bot=null;
 			  setTimeout(main, 30*1000);
 			});
 
