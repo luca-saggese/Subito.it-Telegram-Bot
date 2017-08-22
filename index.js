@@ -51,11 +51,12 @@ var config={}
 				const dateString=xpath.select1('.//time',n).getAttribute('datetime');
 				var specs=xpath.select1('.//span[@class="item_specs"]/text()',n);
 				if(specs) specs=specs.data.trim();
-				const price=xpath.select1('.//span[@class="item_price"]/text()',n).data.trim().replace('&euro;','€');
+				var price=xpath.select1('.//span[@class="item_price"]/text()',n);
+				if(price) price=price.data.trim().replace('&euro;','€');
 				const info=xpath.select1('.//span[contains(@class, "item_info")]',n).getAttribute('class').split(' ');
 				const location=xpath.select1('.//span[@class="item_location"]/text()',n).data.trim();
 				var extra_data=xpath.select('.//div[@class="item_extra_data"]/ul/li/text()',n);
-				var phone_number=xpath.select1('.//div[@class="phone_number"]/text()',n);
+				var phone_number=xpath.select1('.//div[@class="phone_number"]/span/text()',n);
 				if(phone_number) phone_number=phone_number.data.trim();
 				
 				if(extra_data)extra_data=extra_data.map((d)=> {return d.data.trim()});
@@ -79,7 +80,7 @@ var config={}
  function main(){
 	jsonfile.readFile(file, function(err, obj) {
 		config=obj;
-		console.log(err,config);
+		console.log(4,err,config);
 		if(!transporter){
 			/*transporter = nodemailer.createTransport({
 			  service: 'gmail',
@@ -96,13 +97,19 @@ var config={}
 				proxy: config.proxy,
 			  },
 			});
+			bot.on('polling_error', (error) => {
+			  console.log(error);  // => 'EFATAL'
+			  bot.stopPolling(); 
+			  setTimeout(main, 30*1000);
+			});
 
 			bot.onText(/\/search\sadd (.+)/, (msg, match) => {
-			  const chatId = msg.chat.id;
+			  const chat_id = msg.chat.id;
 			  const url = match[1]; 
-			  config.searches.push({url}); 
+			  const lastDatetime = new Date().getTime();
+			  config.searches.push({url, chat_id, lastDatetime}); 
 			  jsonfile.writeFile(file, config,{spaces: 2},function (err) {});
-			  bot.sendMessage(chatId, 'search added');
+			  bot.sendMessage(chat_id, 'search added');
 			});
 
 			bot.onText(/\/search\sdel (\d+)/, (msg, match) => {
@@ -116,9 +123,11 @@ var config={}
 			bot.onText(/\/search list/, (msg, match) => {
 			  const chatId = msg.chat.id;
 			  var id=1;
+			  var ret='';
 			  config.searches.forEach(s =>{
-				bot.sendMessage(chatId,id++ + ' ' + s.url);
+				  ret += id++ + ' ' + s.url + '\n';
 			  });
+			  bot.sendMessage(chatId, ret);
 			});
 			bot.onText(/\help/, (msg, match) => {
 			  const chatId = msg.chat.id;
@@ -134,23 +143,23 @@ var config={}
 	  var searchCount = config.searches.length;
 	  config.searches.forEach(s =>{
 		 getSubitoArticles(s.url, s.lastDatetime, (err, items, lastDatetime) =>{
-			 console.log(items);
-			 if(items){
+			 if(err){
+				console.log('error',err,'restarting....');
+				bot.stopPolling(); 
+				setTimeout(main, 30*1000);
+			 }else if(items){
 				 items.forEach(i=>{
-					 msg='<a href="'+i.url+'">'+ i.title  + '</a>\n' + (i.specs || i.extra_data.join(' ')) + '\n<strong>' + i.price +'</strong>';// + '\n' + i.img;
-					 console.log(msg)
-					 bot.sendMessage(config.telegram_chatId, msg, {parse_mode:'HTML'});
+					 msg='<a href="'+i.url+'">'+ i.title  + '</a>\n' + (i.specs || i.extra_data.join(' ')) + '\n<strong>' + i.price +'</strong> tel: ' + i.phone_number;// + '\n' + i.img;
+					 console.log(2,msg)
+					 bot.sendMessage(s.chat_id, msg, {parse_mode:'HTML'});
 				 })
 				 s.lastDatetime=lastDatetime;
 				 config.lastRun=new Date().getTime();
-				 console.log(s);
+				 console.log(1,s);
 				 jsonfile.writeFile(file, config,{spaces: 2},function (err) {
 					  searchCount --;
 					  if(searchCount==0) {
-						  
-						  //bot.stopPolling();
 						  setTimeout(main, 180*1000);
-						  //process.exit(0);
 					  }
 				  })
 			 }
