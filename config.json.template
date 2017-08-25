@@ -5,6 +5,7 @@
   "gmail_user": "",
   "gmail_pass": "",
   "mailto": "",
+  "no_rimettiincima": true,
   "searches": [
     {
       "url": "http://www.subito.it/annunci-lazio/vendita/auto/?cb=002222&&pe=3000&q=cooper%20s"
